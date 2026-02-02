@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindful OS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <h1>Daily log</h1>
+            
+            <div class="history-bar">
+                <button id="undoBtn" title="Undo (Ctrl + Z)">↶</button>
+                <button id="redoBtn" title="Redo (Ctrl + Shift + Z)">↷</button>
+            </div>
+        </div>
+
+        <input 
+            type="text"
+            id="searchInput"
+            placeholder="Search by notes or #tags....."
+            class="search"
+        />
+
+        <textarea id="noteInput" placeholder="Dont keep it in ur head.... write it down"></textarea>
+
+        <button id="saveBtn">Save</button>
+
+        <div id="notesContainer"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+/* =====================================================
+   1. RESET & GLOBALS
+   ===================================================== */
+
+* {
+  box-sizing: border-box; /* Pro tip: prevents padding from breaking layouts */
+}
+
+body {
+  margin: 0;
+  background-color: #121212;
+  color: #eaeaea;
+  font-family: Arial, sans-serif;
+}
+
+
+/* =====================================================
+   2. APP LAYOUT
+   ===================================================== */
+
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px; 
+  /* Pro tip: prefer gap over margins between siblings */
+}
+
+
+/* =====================================================
+   3. TOP BAR (TITLE + HISTORY)
+   ===================================================== */
+
+.top-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px; /* reduced to fix visual imbalance */
+}
+
+.top-bar h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin: 0; /* Pro tip: always zero margins on headings you control */
+}
+
+.history-bar {
+  display: flex;
+  gap: 8px;
+}
+
+/* Undo / Redo buttons */
+.history-bar button {
+  background: #0f0f0f;
+  color: #ccc;
+
+  border: 1px solid #222;
+  border-radius: 10px;
+
+  padding: 6px 10px;
+  font-size: 0.9rem;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border 0.2s ease,
+    transform 0.05s ease;
+}
+
+.history-bar button:hover:not(:disabled) {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+.history-bar button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.history-bar button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   4. INPUTS (SEARCH + NOTE)
+   ===================================================== */
+
+input,
+textarea {
+  width: 100%;
+  background: #0f0f0f;
+  color: #eee;
+
+  border: 1px solid #222;
+  border-radius: 10px;
+
+  padding: 12px;
+  font-size: 0.95rem;
+
+  outline: none;
+}
+
+/* Search bar */
+.search {
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search::placeholder {
+  color: #777;
+}
+
+.search:focus {
+  border-color: #444;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+}
+
+/* Note input */
+textarea {
+  height: 120px;
+  resize: vertical; /* Pro tip: allow user control without breaking layout */
+}
+
+mark {
+  background: rgba(255, 255, 255, 0.15);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 4px;
+}
+
+/* =====================================================
+   5. SAVE BUTTON
+   ===================================================== */
+
+#saveBtn {
+  width: 100%;
+  padding: 12px;
+
+  background: #111;
+  color: #eaeaea;
+
+  border: 1px solid #222;
+  border-radius: 12px;
+
+  font-size: 0.95rem;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border 0.2s ease,
+    transform 0.05s ease;
+}
+
+#saveBtn:hover {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+#saveBtn:active {
+  transform: scale(0.98);
+}
+
+#saveBtn:focus {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
+}
+
+
+/* =====================================================
+   6. NOTES LIST
+   ===================================================== */
+
+.note {
+  position: relative;
+  padding: 10px;
+  background-color: #1e1e1e;
+
+  border-left: 3px solid #555;
+}
+
+.note small {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.note-text[contenteditable="true"] {
+  outline: none;
+  border-left: 3px solid #6cf;
+  padding-left: 6px;
+}
+
+
+/* =====================================================
+   7. NOTE ACTION BUTTONS
+   ===================================================== */
+
+.pin-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.pin-btn {
+  margin-right: 6px;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  color: #888;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  color: #ff6b6b;
+}
+
+
+/* =====================================================
+   8. EMPTY STATE
+   ===================================================== */
+
+.empty-state {
+  text-align: center;
+  color: #666;
+  padding: 40px 0;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+/* =====================================================
+   8. DELETE UNDO
+   ===================================================== */
+
+.undo {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);   /* THIS is key */
+  
+  background: #222;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 1000;
+}

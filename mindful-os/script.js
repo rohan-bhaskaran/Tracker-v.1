@@ -1,0 +1,350 @@
+//VARIABLES
+const searchInput = document.getElementById("searchInput");
+const noteInput = document.getElementById("noteInput");
+const saveBtn = document.getElementById("saveBtn");
+const notesContainer = document.getElementById("notesContainer");
+const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
+
+//STATE
+let notes = JSON.parse(localStorage.getItem("notes")) || [];
+let versions = JSON.parse(localStorage.getItem("versions")) || [];
+let currentVersionIndex = versions.length ? versions.length - 1 : -1;
+let searchQuery = "";
+if (versions.length === 0) {
+  saveVersion("Initial state");
+}
+
+//COMMIT 
+function commit(label) {
+  saveVersion(label);
+  persist();
+  renderNotes();
+}
+
+//PERSIST
+function persist() {
+  localStorage.setItem("notes", JSON.stringify(notes));
+  localStorage.setItem("versions", JSON.stringify(versions));
+}
+
+//VERSION CONTROL
+undoBtn.addEventListener("click", undo);
+redoBtn.addEventListener("click", redo);
+
+function updateHistoryButtons() {
+  undoBtn.disabled = currentVersionIndex <= 0;
+  redoBtn.disabled = currentVersionIndex >= versions.length - 1;
+}
+
+function saveVersion(label = "Change") {
+  versions = versions.slice(0,currentVersionIndex+1);
+
+  const snapshot = {
+    label,
+    time: new Date().toLocaleString(),
+    notes: JSON.parse(JSON.stringify(notes)) // this JSON.parse(JSON.stringify()) helps create a deep copy
+  };
+
+  versions.push(snapshot);
+  currentVersionIndex++;
+  updateHistoryButtons();
+};
+
+function undo() {
+  if (currentVersionIndex <= 0) return;
+
+  currentVersionIndex--;
+
+  notes = JSON.parse(
+    JSON.stringify(versions[currentVersionIndex].notes)
+  );
+
+  persist();
+  renderNotes();
+  updateHistoryButtons();
+}
+
+function redo() {
+  if (currentVersionIndex >= versions.length - 1) return;
+
+  currentVersionIndex++;
+  notes = JSON.parse(
+    JSON.stringify(versions[currentVersionIndex].notes)
+  );
+
+  persist();
+  renderNotes();
+  updateHistoryButtons();
+}
+
+function restoreVersion(index) {
+  const snapshot = versions[index];
+  if (!snapshot) return;
+
+  notes = JSON.parse(JSON.stringify(snapshot.notes));
+  localStorage.setItem("notes", JSON.stringify(notes));
+  renderNotes();
+};
+
+window.showVersions = function () {
+  console.clear();
+  versions.forEach((v,i) => {
+    console.log(`${i}: ${v.label} @ ${v.time}`);
+  });
+};
+
+//SEARCH NOTES
+searchInput.addEventListener("input", () => { //damn insted of searching on basis of enter we using on basis of each letter so we see searches in real time
+  searchQuery = searchInput.value.toLowerCase();
+  renderNotes();
+});
+
+function highlightText(text, query) {
+  if (!query) return text;
+
+  const escaped = query.replace(/[.*+?{}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+
+  return text.replace(regex, `<mark>$1</mark>`);
+}
+
+// NOTES CREATE
+function createNote(text) {
+  return {
+    id: crypto.randomUUID(),
+    text,
+    time: new Date().toLocaleString(),
+    pinned: false,
+    deleted: false,
+    tags: extractTags(text)
+  }
+}
+
+function addNote(text) {
+  const note = createNote(text);
+  notes.push(note);
+  commit("Add note");
+}
+
+function extractTags(text) {
+  const matches = text.match(/#\w+/g);
+  return matches ? matches.map(tag => tag.slice(1)) : [];
+};
+
+//SAVE NOTES
+saveBtn.addEventListener("click", () => {
+  const text = noteInput.value.trim();
+  if (text === "") return;
+  addNote(text);
+  noteInput.value = "";
+});
+
+//DELETE NOTES
+function deleteNote(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note || note.deleted) return;
+
+  note.deleted = true;
+  showUndo(note);
+  commit("Deleted note");
+}
+
+//PIN NOTES
+function togglePin(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+
+  note.pinned = !note.pinned;
+  commit("Toggle pin");
+}
+
+//EDIT NOTES
+function editNote(id, newText) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+
+  const text = newText.trim();
+
+  if (text === "") {
+    note.deleted = true;
+    commit("Delete empty notes");
+    return;
+  }
+
+  note.text = text;
+  note.tags = extractTags(text);
+  commit("Edit note");
+}
+
+//RENDER UI
+function renderNotes() {
+  if (!notes.some(n => !n.deleted)) {
+    notesContainer.innerHTML = `
+      <div class="empty-state">
+        Your mind is clear ✨<br>
+        Write your first note.
+      </div>
+    `;
+    return;
+  }
+
+  notesContainer.innerHTML = "";
+  
+  //FILTER
+  let filteredNotes = notes.filter(note => {
+    if (note.deleted) return false;
+    
+    const textMatch = note.text.toLowerCase().includes(searchQuery);
+    const tagMatch = (note.tags || []).some(tag =>
+      tag.toLowerCase().includes(searchQuery) // includes helps to do partial search , so like search script for javascript result
+    );
+    return textMatch || tagMatch;// either text or tag matches the search
+  })
+  
+  const sortedNotes = [...filteredNotes].sort((a,b) => b.pinned - a.pinned);
+
+  //SORT
+  sortedNotes.forEach((note) => {
+    const div = document.createElement("div");
+    div.className = "note";
+
+    const textE1 = document.createElement("div");
+    textE1.innerHTML = highlightText(note.text, searchQuery);
+    textE1.className = "note-text";
+    
+    const timeE1 = document.createElement("small");
+    timeE1.textContent = note.time;
+    timeE1.style.opacity = "0.6";
+
+    const tagsE1 = document.createElement("div");
+    tagsE1.className = "tags";
+
+    //TAG SEARCH BY ONCLICK
+    (note.tags || []).forEach(tag => {
+      const span = document.createElement("span");
+      span.textContent = `#${tag}`;
+      span.style.cursor = "pointer";
+
+      span.addEventListener("click", () => {
+        searchInput.value = tag;
+        searchQuery = tag.toLowerCase();
+        renderNotes();
+      });
+
+      tagsE1.appendChild(span);
+    });
+
+    if (!tagsE1.children.length) tagsE1.style.display = "none";
+
+    //EDITING
+    textE1.addEventListener("dblclick", () => {
+      textE1.innerHTML = note.text;
+      textE1.setAttribute("contenteditable", "true");
+      textE1.focus(); //Focus means: this element is currently active and ready for input Cursor appears, Keyboard input starts going there ,Screen readers understand it’s active
+    });
+
+    textE1.addEventListener("blur", () => { //blur helps exit edit mode
+      textE1.removeAttribute("contenteditable");
+      editNote(note.id, textE1.textContent);
+    });
+
+    //PINING
+    const pinBtn = document.createElement("button");
+    pinBtn.textContent = note.pinned ? "📌" : "📍";
+    pinBtn.className = "pin-btn";
+    pinBtn.addEventListener("click", () => {
+      togglePin(note.id);
+    })
+    
+    //DELETING
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "❌";
+    deleteBtn.className = "delete-btn";
+    deleteBtn.addEventListener("click", () => {
+      deleteNote(note.id);
+    })
+
+    if (tagsE1.children.length === 0) {
+      tagsE1.style.display = "none";
+    }
+    
+    div.appendChild(pinBtn);
+    div.appendChild(textE1);
+    div.appendChild(timeE1);
+    div.appendChild(tagsE1);
+    div.appendChild(deleteBtn);
+
+    notesContainer.appendChild(div);
+  });
+};
+
+//DELETE UNDO
+function showUndo(note) {
+  const undo = document.createElement("div");
+  undo.className = "undo";
+  undo.textContent = "Note deleted. Undo?";
+
+  undo.addEventListener("click", () => {
+    console.log("UNDO CALLED");
+    note.deleted = false;
+    undo.remove();
+  });
+
+  document.body.appendChild(undo);
+  setTimeout(() => undo.remove(), 4000);
+};
+
+//SHORTCUTS
+noteInput.addEventListener("keydown", (e) => {
+  const key = e.key.toLowerCase();
+  
+  if (key === "enter" && !e.shiftKey) {
+    e.preventDefault();
+    const text = noteInput.value.trim();
+    if (!text) return;
+
+    addNote(text);
+    noteInput.value = "";
+  }
+
+  if (e.key === "Escape") {
+    noteInput.value = "";
+    noteInput.blur();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  const key = e.key.toLowerCase();
+
+  if (e.ctrlKey && key === "z" && !e.shiftKey) {
+    e.preventDefault();
+    undo();
+  }
+
+  if (e.ctrlKey && key === "y" && !e.shiftKey) {
+    e.preventDefault();
+    redo();
+  }
+    
+  if (e.ctrlKey && key === "z" && e.shiftKey) {
+    e.preventDefault();
+    redo();
+  }
+
+  if (e.ctrlKey && (key === "/" || key === "?")) {
+    e.preventDefault();
+    searchInput.focus();
+  }
+
+  if (e.key === "Escape") {
+    console.log("ESC pressed");
+    searchInput.value = "";
+    searchInput.blur();
+    renderNotes();
+  }
+}, true);
+
+renderNotes();
+console.log(notes);
+
