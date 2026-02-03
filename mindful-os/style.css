@@ -388,3 +388,63 @@ body.trash-mode {
   cursor: pointer;
   z-index: 1000;
 }
+
+/* =====================================================
+   11. VERSION TIMELINE
+   ===================================================== */
+
+.timeline {
+  margin-top: 24px;
+  padding: 12px;
+
+  background: #0f0f0f;
+  border: 1px solid #222;
+  border-radius: 12px;
+
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.timeline h3 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.timeline-item {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+
+  border-radius: 8px;
+  border: 1px solid transparent;
+
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.timeline-item:hover {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+.timeline-item.active {
+  background: #161616;
+  border-color: #6cf;
+}
+
+.timeline-item small {
+  opacity: 0.5;
+  font-size: 0.7rem;
+}
+
+.hidden {
+  display: none;
+}

@@ -24,6 +24,7 @@ function commit(label) {
   saveVersion(label);
   persist();
   renderNotes();
+  renderTimeline();
 }
 
 //PERSIST
@@ -69,6 +70,7 @@ function undo() {
   persist();
   renderNotes();
   updateHistoryButtons();
+  renderTimeline();
 }
 
 function redo() {
@@ -82,6 +84,7 @@ function redo() {
   persist();
   renderNotes();
   updateHistoryButtons();
+  renderTimeline();
 }
 
 function restoreVersion(index) {
@@ -99,6 +102,43 @@ window.showVersions = function () {
     console.log(`${i}: ${v.label} @ ${v.time}`);
   });
 };
+
+//TIMELINE UI
+function renderTimeline() {
+  const panel = document.getElementById("timelinePanel");
+  const list = document.getElementById("timelineList");
+
+  if (!versions.length) {
+    panel.classList.add("hidden");
+    return;
+  }
+
+  panel.classList.remove("hidden");
+  list.innerHTML = "";
+
+  versions.forEach((v, index) => {
+    const item = document.createElement("div");
+    item.className = "timeline-item";
+
+    if (index === currentVersionIndex) {
+      item.classList.add("active");
+    }
+
+    item.innerHTML = `
+    <div>${v.label}</div>
+    <small>${v.time}</small>
+    `;
+
+    item.addEventListener("click", () => {
+      restoreVersion(index);
+      currentVersionIndex = index;
+      updateHistoryButtons();
+      renderTimeline();
+    });
+
+    list.appendChild(item);
+  });
+}
 
 //SEARCH NOTES
 searchInput.addEventListener("input", () => { //damn insted of searching on basis of enter we using on basis of each letter so we see searches in real time
@@ -327,6 +367,7 @@ function renderNotes() {
   });
 
   document.body.classList.toggle("trash-mode", viewMode === "trash");
+  renderTimeline();
 };
 
 //DELETE UNDO
