@@ -169,9 +169,65 @@ mark {
   box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
 }
 
+/* =====================================================
+   6. TRASH VIEW
+   ===================================================== */
+#trashBtn {
+  background: #0f0f0f;
+  color: #ccc;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+#trashBtn:hover {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+.note.trash {
+  opacity: 0.6;
+  border-left-color: #aa4444;
+}
+
+/* .restore-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+.restore-btn:hover {
+  color: #6cf;
+} */
+
+.restore-btn {
+  background: #161616;
+  border: 1px solid #222;
+  color: #aaa;
+
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin-right: 6px;
+
+  cursor: pointer;
+  font-size: 13px;
+
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.restore-btn:hover {
+  background: #1f1f1f;
+  color: #6cf;
+}
 
 /* =====================================================
-   6. NOTES LIST
+   7. NOTES LIST
    ===================================================== */
 
 .note {
@@ -197,7 +253,7 @@ mark {
 
 
 /* =====================================================
-   7. NOTE ACTION BUTTONS
+   8. NOTE ACTION BUTTONS
    ===================================================== */
 
 .pin-btn,
@@ -226,7 +282,7 @@ mark {
 
 
 /* =====================================================
-   8. EMPTY STATE
+   9. EMPTY STATE
    ===================================================== */
 
 .empty-state {
@@ -238,14 +294,14 @@ mark {
 }
 
 /* =====================================================
-   8. DELETE UNDO
+  10. DELETE UNDO
    ===================================================== */
 
 .undo {
   position: fixed;
   bottom: 20px;
   left: 50%;
-  transform: translateX(-50%);   /* THIS is key */
+  transform: translateX(-50%);  /* THIS is key */
   
   background: #222;
   color: white;

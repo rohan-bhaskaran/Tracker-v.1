@@ -5,17 +5,21 @@ const saveBtn = document.getElementById("saveBtn");
 const notesContainer = document.getElementById("notesContainer");
 const undoBtn = document.getElementById("undoBtn");
 const redoBtn = document.getElementById("redoBtn");
+const trashBtn = document.getElementById("trashBtn");
 
 //STATE
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let versions = JSON.parse(localStorage.getItem("versions")) || [];
 let currentVersionIndex = versions.length ? versions.length - 1 : -1;
 let searchQuery = "";
+let viewMode = "active";
+
 if (versions.length === 0) {
   saveVersion("Initial state");
 }
 
-//COMMIT 
+
+//COMMIT (undoable)
 function commit(label) {
   saveVersion(label);
   persist();
@@ -138,6 +142,7 @@ saveBtn.addEventListener("click", () => {
   if (text === "") return;
   addNote(text);
   noteInput.value = "";
+  noteInput.blur();
 });
 
 //DELETE NOTES
@@ -146,8 +151,25 @@ function deleteNote(id) {
   if (!note || note.deleted) return;
 
   note.deleted = true;
-  showUndo(note);
   commit("Deleted note");
+  showUndo(id);
+}
+
+trashBtn.addEventListener("click", () => {
+  viewMode = viewMode === "active" ? "trash" : "active";
+  trashBtn.textContent = viewMode === "trash" ? "← Back" : "🗑 Trash";
+  renderNotes();
+});
+
+function permanentlyDelete(id) {
+  notes = notes.filter(n => n.id !== id);
+  versions.forEach(v => {
+    v.notes = v.notes.filter(n => n.id !== id);//deletin that obj in each version (key feature)
+  });
+
+  persist();
+  renderNotes();
+  updateHistoryButtons();
 }
 
 //PIN NOTES
@@ -167,8 +189,7 @@ function editNote(id, newText) {
   const text = newText.trim();
 
   if (text === "") {
-    note.deleted = true;
-    commit("Delete empty notes");
+    deleteNote(id);
     return;
   }
 
@@ -179,21 +200,25 @@ function editNote(id, newText) {
 
 //RENDER UI
 function renderNotes() {
-  if (!notes.some(n => !n.deleted)) {
+  const visible = notes.filter(n =>
+    viewMode === "trash" ? n.deleted : !n.deleted
+  );
+
+  if (!visible.length) {
     notesContainer.innerHTML = `
       <div class="empty-state">
-        Your mind is clear ✨<br>
-        Write your first note.
+        ${viewMode === "trash" ? "Trash is empty 🧹" : "Your mind is clear ✨"}
       </div>
     `;
     return;
   }
 
   notesContainer.innerHTML = "";
-  
+
   //FILTER
   let filteredNotes = notes.filter(note => {
-    if (note.deleted) return false;
+    if (viewMode === "active" && note.deleted) return false;
+    if (viewMode === "trash" && !note.deleted) return false;
     
     const textMatch = note.text.toLowerCase().includes(searchQuery);
     const tagMatch = (note.tags || []).some(tag =>
@@ -259,11 +284,29 @@ function renderNotes() {
     
     //DELETING
     const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "❌";
     deleteBtn.className = "delete-btn";
-    deleteBtn.addEventListener("click", () => {
-      deleteNote(note.id);
-    })
+
+    if (viewMode === "active") {
+      deleteBtn.textContent = "❌";
+      deleteBtn.addEventListener("click", () => {
+        deleteNote(note.id);
+      });
+    } else {
+      deleteBtn.textContent = "🧨";
+      deleteBtn.addEventListener("click", () => {
+        permanentlyDelete(note.id); 
+      });
+
+      const restoreBtn = document.createElement("button");
+      restoreBtn.textContent = "♻";
+      restoreBtn.className = "restore-btn";
+      restoreBtn.addEventListener("click", () => {
+        note.deleted = false;
+        commit("Restore note");
+      });
+
+      div.appendChild(restoreBtn);
+    }
 
     if (tagsE1.children.length === 0) {
       tagsE1.style.display = "none";
@@ -280,14 +323,19 @@ function renderNotes() {
 };
 
 //DELETE UNDO
-function showUndo(note) {
+function showUndo(noteId) {
   const undo = document.createElement("div");
   undo.className = "undo";
   undo.textContent = "Note deleted. Undo?";
 
   undo.addEventListener("click", () => {
+    const note = notes.find(n => n.id === noteId);
+    if (!note || viewMode === "trash") return;
+
     console.log("UNDO CALLED");
     note.deleted = false;
+    commit("Undo delete")
+
     undo.remove();
   });
 
@@ -299,7 +347,7 @@ function showUndo(note) {
 noteInput.addEventListener("keydown", (e) => {
   const key = e.key.toLowerCase();
   
-  if (key === "enter" && !e.shiftKey) {
+  if (key === "enter" && !e.shiftKey && document.activeElement === noteInput) {
     e.preventDefault();
     const text = noteInput.value.trim();
     if (!text) return;
@@ -343,8 +391,7 @@ document.addEventListener("keydown", (e) => {
     searchInput.blur();
     renderNotes();
   }
-}, true);
+}, {capture: true});
 
 renderNotes();
 console.log(notes);
-
