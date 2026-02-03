@@ -181,6 +181,79 @@ mark {
   cursor: pointer;
   font-size: 0.85rem;
 
+  transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+}
+
+#trashBtn:hover {
+  background: #1a1a1a;
+  border-color: #333;
+  color: #eee;
+}
+
+body.trash-mode {
+  background: #0d0d0d;
+}
+
+.trash-mode .note {
+  opacity: 0.55;
+  border: 1px dashed #3a3a3a;
+  background: #121212;
+}
+
+.trash-mode .note:hover {
+  opacity: 0.6;
+  transform: none;
+}
+
+.trash-mode .pin-btn {
+  display: none;
+}
+
+.restore-btn {
+  background: #121212;
+  border: 1px solid #2a2a2a;
+  color: #8fd3ff;
+
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-right: 6px;
+
+  cursor: pointer;
+  font-size: 13px;
+
+  transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+}
+
+.restore-btn:hover {
+  background: #1b1b1b;
+  border-color: #3a3a3a;
+  color: #bde6ff;
+}
+
+.trash-mode .delete-btn {
+  background: transparent;
+  border: 1px solid #3a1a1a;
+  color: #cc6666;
+  border-radius: 6px;
+  padding: 4px 6px;
+
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.trash-mode .delete-btn:hover {
+  background: #2a1212;
+  color: #ff8888;
+}
+
+/* #trashBtn {
+  background: #0f0f0f;
+  color: #ccc;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+
   transition: background 0.2s ease, border 0.2s ease;
 }
 
@@ -193,18 +266,6 @@ mark {
   opacity: 0.6;
   border-left-color: #aa4444;
 }
-
-/* .restore-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-right: 6px;
-  font-size: 14px;
-}
-
-.restore-btn:hover {
-  color: #6cf;
-} */
 
 .restore-btn {
   background: #161616;
@@ -225,6 +286,23 @@ mark {
   background: #1f1f1f;
   color: #6cf;
 }
+
+body.trash-mode {
+  background: #0f0f0f;
+}
+
+.trash-mode .note {
+  opacity: 0.6;
+  border: 1px dashed #444;
+}
+
+.trash-mode .note:hover {
+  opacity: 0.9;
+}
+
+.trash-mode .pin-btn {
+  display: none;
+} */
 
 /* =====================================================
    7. NOTES LIST

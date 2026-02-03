@@ -37,6 +37,8 @@ undoBtn.addEventListener("click", undo);
 redoBtn.addEventListener("click", redo);
 
 function updateHistoryButtons() {
+  const disabled = viewMode === "trash";
+
   undoBtn.disabled = currentVersionIndex <= 0;
   redoBtn.disabled = currentVersionIndex >= versions.length - 1;
 }
@@ -152,11 +154,14 @@ function deleteNote(id) {
 
   note.deleted = true;
   commit("Deleted note");
-  showUndo(id);
+  if (viewMode === "active") {
+    showUndo(id);
+  }
 }
 
 trashBtn.addEventListener("click", () => {
   viewMode = viewMode === "active" ? "trash" : "active";
+  document.body.classList.toggle("trash-mode", viewMode === "trash");
   trashBtn.textContent = viewMode === "trash" ? "← Back" : "🗑 Trash";
   renderNotes();
 });
@@ -320,6 +325,8 @@ function renderNotes() {
 
     notesContainer.appendChild(div);
   });
+
+  document.body.classList.toggle("trash-mode", viewMode === "trash");
 };
 
 //DELETE UNDO
