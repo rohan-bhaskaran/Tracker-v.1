@@ -344,6 +344,17 @@ function showUndo(noteId) {
 };
 
 //SHORTCUTS
+function isTypingContext() {
+  const el = document.activeElement;
+  if (!el) return false;
+
+  return (
+    el.tagName === "INPUT" ||
+    el.tagName === "TEXTAREA" ||
+    el.isContentEditable
+  );
+}
+
 noteInput.addEventListener("keydown", (e) => {
   const key = e.key.toLowerCase();
   
@@ -356,14 +367,24 @@ noteInput.addEventListener("keydown", (e) => {
     noteInput.value = "";
   }
 
-  if (e.key === "Escape") {
-    noteInput.value = "";
-    noteInput.blur();
-  }
+  // if (e.key === "Escape") {
+  //   noteInput.value = "";
+  //   noteInput.blur();
+  // }
 });
 
 document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.activeElement?.isContentEditable) {
+    e.preventDefault();
+    document.activeElement.blur();
+    return;
+  }
+
   const key = e.key.toLowerCase();
+
+  //disable in trash view and typing
+  if (isTypingContext()) return;
+  if (viewMode === "trash") return;
 
   if (e.ctrlKey && key === "z" && !e.shiftKey) {
     e.preventDefault();
@@ -386,10 +407,25 @@ document.addEventListener("keydown", (e) => {
   }
 
   if (e.key === "Escape") {
+
+    if (document.activeElement === noteInput) {
+      noteInput.value = "";
+      noteInput.blur();
+      return;
+    }
+
+    if (document.activeElement?.isContentEditable) {
+      document.activeElement.blur();
+      return;
+    }
+
+    if (searchInput.value) {
+      searchInput.value = "";
+      searchQuery = "";
+      renderNotes();
+    }
+
     console.log("ESC pressed");
-    searchInput.value = "";
-    searchInput.blur();
-    renderNotes();
   }
 }, {capture: true});
 
