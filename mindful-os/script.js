@@ -6,6 +6,8 @@ const notesContainer = document.getElementById("notesContainer");
 const undoBtn = document.getElementById("undoBtn");
 const redoBtn = document.getElementById("redoBtn");
 const trashBtn = document.getElementById("trashBtn");
+const historyBtn = document.getElementById("historyBtn");
+const timelinePanel = document.getElementById("timelinePanel");
 
 //STATE
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
@@ -13,6 +15,7 @@ let versions = JSON.parse(localStorage.getItem("versions")) || [];
 let currentVersionIndex = versions.length ? versions.length - 1 : -1;
 let searchQuery = "";
 let viewMode = "active";
+let isTimelineOpen = false;
 
 if (versions.length === 0) {
   saveVersion("Initial state");
@@ -104,17 +107,20 @@ window.showVersions = function () {
 };
 
 //TIMELINE UI
+function getChangeType(label) {
+  label = label.toLowerCase();
+
+  if (label.includes("add")) return "add";
+  if (label.includes("delete")) return "delete";
+  if (label.includes("restore")) return "restore";
+  if (label.includes("edit")) return "edit";
+  if (label.includes("pin")) return "pin";
+
+  return "other";
+}
+
 function renderTimeline() {
-  const panel = document.getElementById("timelinePanel");
-  const list = document.getElementById("timelineList");
-
-  if (!versions.length) {
-    panel.classList.add("hidden");
-    return;
-  }
-
-  panel.classList.remove("hidden");
-  list.innerHTML = "";
+  timelinePanel.innerHTML = "";
 
   versions.forEach((v, index) => {
     const item = document.createElement("div");
@@ -124,21 +130,49 @@ function renderTimeline() {
       item.classList.add("active");
     }
 
+    const type = getChangeType(v.label);
+    item.dataset.type = type;
+
     item.innerHTML = `
-    <div>${v.label}</div>
-    <small>${v.time}</small>
-    `;
+      <span class="label">${v.label}</span>
+      <small>${v.time}</small>
+    `;  
 
     item.addEventListener("click", () => {
-      restoreVersion(index);
-      currentVersionIndex = index;
-      updateHistoryButtons();
-      renderTimeline();
+      restoreFromTimeLine(index);
     });
 
-    list.appendChild(item);
+    timelinePanel.appendChild(item);
   });
 }
+
+function restoreFromTimeLine(index) {
+  const snapshot = versions[index];
+  if (!snapshot) return;
+
+  notes = JSON.parse(JSON.stringify(snapshot.notes));
+  currentVersionIndex = index;
+
+  persist();
+  renderNotes();
+  updateHistoryButtons();
+
+  isTimelineOpen = false;
+  timelinePanel.classList.add("hidden");
+  historyBtn.classList.remove("active");
+}
+
+function toggleTimeline() {
+  if (viewMode === "trash") return;
+
+  isTimelineOpen = !isTimelineOpen;
+  timelinePanel.classList.toggle("hidden", !isTimelineOpen);
+  historyBtn.classList.toggle("active", isTimelineOpen);
+
+  if (isTimelineOpen) renderTimeline();
+}
+
+historyBtn.addEventListener("click", toggleTimeline);
 
 //SEARCH NOTES
 searchInput.addEventListener("input", () => { //damn insted of searching on basis of enter we using on basis of each letter so we see searches in real time
@@ -201,8 +235,13 @@ function deleteNote(id) {
 
 trashBtn.addEventListener("click", () => {
   viewMode = viewMode === "active" ? "trash" : "active";
-  document.body.classList.toggle("trash-mode", viewMode === "trash");
   trashBtn.textContent = viewMode === "trash" ? "← Back" : "🗑 Trash";
+
+  if (viewMode === "trash") {
+    isTimelineOpen = false;
+    timelinePanel.classList.add("hidden");
+    historyBtn.classList.add("active");
+  }
   renderNotes();
 });
 
@@ -433,6 +472,11 @@ document.addEventListener("keydown", (e) => {
   //disable in trash view and typing
   if (isTypingContext()) return;
   if (viewMode === "trash") return;
+
+  if (e.ctrlKey && key === "h") {
+    e.preventDefault();
+    toggleTimeline();
+  }
 
   if (e.ctrlKey && key === "z" && !e.shiftKey) {
     e.preventDefault();

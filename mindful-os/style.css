@@ -86,6 +86,70 @@ body {
   cursor: not-allowed;
 }
 
+/* =====================================================
+   3.5 VERSION TIMELINE
+   ===================================================== */
+
+.timeline {
+  background: #0f0f0f;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline.hidden {
+  display: none;
+}
+
+.timeline-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  transition: background 0.2s ease;
+}
+
+.timeline-item:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.timeline-item.current {
+  background: #1f1f1f;
+  border-left: 3px solid #6cf;
+}
+
+.timeline-item.active {
+  background: #222;
+  color: #6cf;
+}
+
+.timeline-item[data-type="add"] .label {
+  color: #8fd18f;
+}
+
+.timeline-item[data-type="delete"] .label {
+  color: #ff8f8f;
+}
+
+.timeline-item[data-type="restore"] .label {
+  color: #6cf;
+}
+
+.timeline-item[data-type="edit"] .label {
+  color: #ffd27d;
+}
+
+.timeline-item[data-type="pin"] .label {
+  color: #caa6ff;
+}
 
 /* =====================================================
    4. INPUTS (SEARCH + NOTE)
