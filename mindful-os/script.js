@@ -41,10 +41,10 @@ undoBtn.addEventListener("click", undo);
 redoBtn.addEventListener("click", redo);
 
 function updateHistoryButtons() {
-  const disabled = viewMode === "trash";
+  const locked = viewMode === "trash";
 
-  undoBtn.disabled = currentVersionIndex <= 0;
-  redoBtn.disabled = currentVersionIndex >= versions.length - 1;
+  undoBtn.disabled = locked || currentVersionIndex <= 0;
+  redoBtn.disabled = locked || currentVersionIndex >= versions.length - 1;
 }
 
 function saveVersion(label = "Change") {
@@ -105,6 +105,15 @@ window.showVersions = function () {
     console.log(`${i}: ${v.label} @ ${v.time}`);
   });
 };
+
+function updateTrashUI() {
+  const inTrash = viewMode === "trash";
+
+  saveBtn.disabled = inTrash;
+  undoBtn.disabled = inTrash;
+  redoBtn.disabled = inTrash;
+  historyBtn.disabled = inTrash;
+}
 
 //TIMELINE UI
 function getChangeType(label) {
@@ -240,8 +249,9 @@ trashBtn.addEventListener("click", () => {
   if (viewMode === "trash") {
     isTimelineOpen = false;
     timelinePanel.classList.add("hidden");
-    historyBtn.classList.add("active");
+    historyBtn.classList.remove("active");
   }
+  updateTrashUI();
   renderNotes();
 });
 

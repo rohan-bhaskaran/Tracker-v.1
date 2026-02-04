@@ -309,64 +309,15 @@ body.trash-mode {
   color: #ff8888;
 }
 
-/* #trashBtn {
-  background: #0f0f0f;
-  color: #ccc;
-  border: 1px solid #222;
-  border-radius: 10px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 0.85rem;
-
-  transition: background 0.2s ease, border 0.2s ease;
+body.trash-mode .container {
+  opacity: 0.92;
 }
 
-#trashBtn:hover {
-  background: #1a1a1a;
-  border-color: #333;
+body.trash-mode textarea,
+body.trash-mode #saveBtn {
+  opacity: 0.4;
+  pointer-events: none;
 }
-
-.note.trash {
-  opacity: 0.6;
-  border-left-color: #aa4444;
-}
-
-.restore-btn {
-  background: #161616;
-  border: 1px solid #222;
-  color: #aaa;
-
-  border-radius: 6px;
-  padding: 4px 6px;
-  margin-right: 6px;
-
-  cursor: pointer;
-  font-size: 13px;
-
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.restore-btn:hover {
-  background: #1f1f1f;
-  color: #6cf;
-}
-
-body.trash-mode {
-  background: #0f0f0f;
-}
-
-.trash-mode .note {
-  opacity: 0.6;
-  border: 1px dashed #444;
-}
-
-.trash-mode .note:hover {
-  opacity: 0.9;
-}
-
-.trash-mode .pin-btn {
-  display: none;
-} */
 
 /* =====================================================
    7. NOTES LIST
