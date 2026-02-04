@@ -13,7 +13,6 @@ body {
   font-family: Arial, sans-serif;
 }
 
-
 /* =====================================================
    2. APP LAYOUT
    ===================================================== */
@@ -29,6 +28,13 @@ body {
   /* Pro tip: prefer gap over margins between siblings */
 }
 
+.day-separator {
+  margin: 18px 0 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
 
 /* =====================================================
    3. TOP BAR (TITLE + HISTORY)

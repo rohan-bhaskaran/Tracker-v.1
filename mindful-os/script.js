@@ -115,19 +115,51 @@ function updateTrashUI() {
   historyBtn.disabled = inTrash;
 }
 
-//TIMELINE UI
+//RENDER HELPERS
 function getChangeType(label) {
   label = label.toLowerCase();
-
+  
   if (label.includes("add")) return "add";
   if (label.includes("delete")) return "delete";
   if (label.includes("restore")) return "restore";
   if (label.includes("edit")) return "edit";
   if (label.includes("pin")) return "pin";
-
+  
   return "other";
 }
 
+function groupNotesByDate(notes) {
+  const groups = {};
+
+  notes.forEach(note => {
+    if (!groups[note.datekey]) {
+      groups[note.datekey] = [];
+    }
+    groups[note.datekey].push(note);
+  });
+
+  return groups;
+}
+
+function getDayLabel(datekey) {
+  const today = new Date();
+  const date = new Date(datekey);
+
+  const diffDays = Math.floor(
+    (today - date) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays === 0) return "Today";
+  if (diffDays ===  1) return "Yesterday";
+
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "short"
+  });
+}
+
+//TIMELINE UI
 function renderTimeline() {
   timelinePanel.innerHTML = "";
 
@@ -209,10 +241,12 @@ function highlightText(text, query) {
 
 // NOTES CREATE
 function createNote(text) {
+  const now = new Date();
   return {
     id: crypto.randomUUID(),
     text,
-    time: new Date().toLocaleString(),
+    time: now.toLocaleString(),
+    datekey: now.toISOString().slice(0,10),
     pinned: false,
     deleted: false,
     tags: extractTags(text)
@@ -332,9 +366,28 @@ function renderNotes() {
   
   const sortedNotes = [...filteredNotes].sort((a,b) => b.pinned - a.pinned);
 
-  //SORT
-  sortedNotes.forEach((note) => {
-    const div = document.createElement("div");
+  const grouped = groupNotesByDate(sortedNotes);
+
+  Object.keys(grouped)
+    .sort((a, b) => b.localeCompare(a))
+    .forEach(datekey => {
+      const header = document.createElement("div");
+      header.className = "day-separator";
+      header.textContent = getDayLabel(datekey);
+      notesContainer.appendChild(header);
+
+      grouped[datekey].forEach(note => {
+        renderSingleNote(note);
+      });
+    });
+
+  document.body.classList.toggle("trash-mode", viewMode === "trash");
+  renderTimeline();
+};
+
+//RENDERING AND SORTING INDIVIDUAL NOTES
+function renderSingleNote(note) {
+  const div = document.createElement("div");
     div.className = "note";
 
     const textE1 = document.createElement("div");
@@ -422,11 +475,7 @@ function renderNotes() {
     div.appendChild(deleteBtn);
 
     notesContainer.appendChild(div);
-  });
-
-  document.body.classList.toggle("trash-mode", viewMode === "trash");
-  renderTimeline();
-};
+}
 
 //DELETE UNDO
 function showUndo(noteId) {
