@@ -16,7 +16,6 @@
                 <button id="redoBtn" title="Redo (Ctrl + Shift + Z)">↷</button>
                 <button id="historyBtn">🕘 History</button>
             </div>
-            <div id="timelinePanel" class="timeline hidden"></div>
 
             <button id="trashBtn">🗑 Trash</button>
         </div>
@@ -34,8 +33,11 @@
 
         <div id="notesContainer"></div>
         <div id="timelinePanel" class="timeline hidden">
-            <h3>History</h3>
-            <div id="timelineList"></div>
+            <div class="timeline-header">
+                <span>History</span>
+            </div>
+
+            <div id="timelineList" class="timeline-list"></div>
         </div>
     </div>
     <script src="script.js"></script>

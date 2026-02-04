@@ -131,7 +131,8 @@ function getChangeType(label) {
 function renderTimeline() {
   timelinePanel.innerHTML = "";
 
-  versions.forEach((v, index) => {
+  [...versions].reverse().forEach((v, i) => {
+    const index = versions.length -1 -i;
     const item = document.createElement("div");
     item.className = "timeline-item";
 
@@ -162,9 +163,10 @@ function restoreFromTimeLine(index) {
   notes = JSON.parse(JSON.stringify(snapshot.notes));
   currentVersionIndex = index;
 
-  persist();
-  renderNotes();
-  updateHistoryButtons();
+  // persist();
+  commit("Restore from history")
+  // renderNotes();
+  // updateHistoryButtons();
 
   isTimelineOpen = false;
   timelinePanel.classList.add("hidden");
@@ -463,11 +465,6 @@ noteInput.addEventListener("keydown", (e) => {
     addNote(text);
     noteInput.value = "";
   }
-
-  // if (e.key === "Escape") {
-  //   noteInput.value = "";
-  //   noteInput.blur();
-  // }
 });
 
 document.addEventListener("keydown", (e) => {
