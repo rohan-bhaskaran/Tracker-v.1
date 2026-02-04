@@ -153,6 +153,16 @@ function renderTimeline() {
     });
 
     timelinePanel.appendChild(item);
+
+    requestAnimationFrame(() => {
+      const activeItem = timelinePanel.querySelector(".timeline-item.active");
+      if (activeItem) {
+        activeItem.scrollIntoView({
+          block: "center",
+          behavior: "smooth"
+        });
+      }
+    });
   });
 }
 
@@ -163,10 +173,7 @@ function restoreFromTimeLine(index) {
   notes = JSON.parse(JSON.stringify(snapshot.notes));
   currentVersionIndex = index;
 
-  // persist();
   commit("Restore from history")
-  // renderNotes();
-  // updateHistoryButtons();
 
   isTimelineOpen = false;
   timelinePanel.classList.add("hidden");
@@ -468,6 +475,15 @@ noteInput.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && isTimelineOpen) {
+    e.preventDefault();
+    isTimelineOpen = false;
+    timelinePanel.classList.add("hidden");
+    historyBtn.classList.remove("active");
+    document.activeElement.blur();
+    return;
+  }
+
   if (e.key === "Escape" && document.activeElement?.isContentEditable) {
     e.preventDefault();
     document.activeElement.blur();
@@ -476,9 +492,10 @@ document.addEventListener("keydown", (e) => {
 
   const key = e.key.toLowerCase();
 
-  //disable in trash view and typing
+  //disable in trash view and typing and history view
   if (isTypingContext()) return;
   if (viewMode === "trash") return;
+  if (isTimelineOpen) return;
 
   if (e.ctrlKey && key === "h") {
     e.preventDefault();
